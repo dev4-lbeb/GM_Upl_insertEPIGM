@@ -18,10 +18,19 @@ class Guardian_LogTxt:
     @staticmethod
     def LogAplicacao(rotina, descricao):
         from Service.Main import Main
+
+        main = Main()
         try:
-            if Main.LogTxtHabilitado == True:
-                if not os.path.exists(os.path.join(os.path.dirname(__file__), "Log")):
-                    os.makedirs(os.path.join(os.path.dirname(__file__), "Log"))
+            if main.LogTxtHabilitado == True:
+                 # Obtenha o diretório do script atual
+                script_dir = os.path.dirname(os.path.abspath(__file__))
+
+                # Navegue para o diretório pai (raiz do projeto)
+                root_dir = os.path.dirname(script_dir)
+
+                log_directory = os.path.join(root_dir, "Log")
+                if not os.path.exists(log_directory):
+                    os.makedirs(log_directory)
 
                 texto_registro = ""
                 if rotina:
@@ -30,7 +39,7 @@ class Guardian_LogTxt:
                     texto_registro += "\n=> " + descricao
 
                 guardian_txt = Guardian_TxtFile()
-                guardian_txt.DefinirTexto(os.path.join(os.path.dirname(__file__), "Log"), "Guardian_Log_ERRO_" + Main.IdCiclo + ".txt", texto_registro)
+                guardian_txt.DefinirTexto(log_directory, f"Guardian_Log_ERRO_{main.IdCiclo}.txt", texto_registro)
         except Exception as ex:
             excecao_txt = str(ex)
 
@@ -38,8 +47,10 @@ class Guardian_LogTxt:
     def LogControle(tipo_controle):
         from Service.Main import Main
         from Config.Service_Config import ServiceConfig
+
+        main = Main()
         try:
-            if Main.LogTxtHabilitado == True:
+            if main.LogTxtHabilitado == True:
                 rotina = ServiceConfig.NomeServico
                 descricao = tipo_controle.name.replace("_", " ")
 
@@ -60,6 +71,6 @@ class Guardian_LogTxt:
                     texto_registro += f"\n=> {descricao}"
 
                 guardian_txt = Guardian_TxtFile()
-                guardian_txt.DefinirTexto(log_directory, f"Guardian_Log_{Main.IdCiclo}.txt", texto_registro)
+                guardian_txt.DefinirTexto(log_directory, f"Guardian_Log_{main.IdCiclo}.txt", texto_registro)
         except Exception as ex:
             excecao_txt = str(ex)

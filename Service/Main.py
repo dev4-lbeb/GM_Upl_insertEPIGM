@@ -1,4 +1,5 @@
 
+
 import pyodbc
 from datetime import datetime
 from Config.GuardianLog import GuardianLog, Tipo
@@ -12,30 +13,39 @@ from Guardian.Guardian_LogTxt import Guardian_LogTxt, TipoControle
 
 
 class Main:
-    IdCiclo = None
-    IdProcessamento = 0
-    NomeCliente = None
-    LogTxtHabilitado = False
-    LogOcorrenciaHabilitado = False
-    LogEmailHabilitado = False
-    LogRotinaHabilitado = False
-    LogAuditoriaHabilitado = False
-    RegistroRotina = None
-    TipoEnvio = None
-    Username = None
-    Password = None
-    DiasLog = 0
+    _instance = None
+
+    def __new__(cls):
+        if cls._instance is None:
+            cls._instance = super(Main, cls).__new__(cls)
+            cls._instance.init()
+        return cls._instance
+    
+    def init(self):
+        self.IdCiclo = None
+        self.IdProcessamento = 0
+        self.NomeCliente = None
+        self.LogTxtHabilitado = True
+        self.LogOcorrenciaHabilitado = True
+        self.LogEmailHabilitado = False
+        self.LogRotinaHabilitado = True
+        self.LogAuditoriaHabilitado = False
+        self.RegistroRotina = None
+        self.TipoEnvio = None
+        self.Username = None
+        self.Password = None
+        self.DiasLog = 0
 
     def ExecucaoServico(self):
         try:
-            Main.IdCiclo = datetime.now().strftime("%Y%m%d%H%M%S")
+            self.IdCiclo = datetime.now().strftime("%Y%m%d%H%M%S")
             ServiceConfig.CarregarConfiguracoes()
-            Main.IdProcessamento = IdProcessamentoDAO.IniciarProcessamento()
+            self.IdProcessamento = IdProcessamentoDAO.IniciarProcessamento()
 
             # dados_empresa_dao = DadosEmpresaDAO()
             # empresas = dados_empresa_dao.buscar_empresas()
 
-            buscar_dados_global()
+            self.buscar_dados_global()
 
             # Adicione o código abaixo ao loop no qual você está iterando sobre as empresas
             # for dados_empresa in empresas:
@@ -53,43 +63,43 @@ class Main:
             #     Guardian_LogTxt.LogControle(TipoControle.Ciclo_Finalizado)
             #     GuardianLog.Log_Rotina("", ServiceConfig.NomeServico, Tipo.Finalizado, Main.IdProcessamento, dados_empresa.CNPJEmpresa)
 
-            if Main.RegistroRotina == "C" or Main.RegistroRotina == "R":
+            if self.RegistroRotina == "C" or self.RegistroRotina == "R":
                 Guardian_LogTxt.LogControle(TipoControle.Ciclo_Iniciado)
-                GuardianLog.Log_Rotina("", ServiceConfig.NomeServico, Tipo.Iniciado, Main.IdProcessamento, "")
+                GuardianLog.Log_Rotina("", ServiceConfig.NomeServico, Tipo.Iniciado, self.IdProcessamento, "")
 
             EpiController.Executar()
 
-            if Main.RegistroRotina == "C" or Main.RegistroRotina == "R":
+            if self.RegistroRotina == "C" or self.RegistroRotina == "R":
                 Guardian_LogTxt.LogControle(TipoControle.Ciclo_Finalizado)
-                GuardianLog.Log_Rotina("", ServiceConfig.NomeServico, Tipo.Finalizado, Main.IdProcessamento, "")
+                GuardianLog.Log_Rotina("", ServiceConfig.NomeServico, Tipo.Finalizado, self.IdProcessamento, "")
         except Exception as ex:
             Guardian_LogTxt.LogAplicacao(ServiceConfig.NomeServico, f"Erro : {ex}")
             GuardianLog.Log_Ocorrencia(ServiceConfig.NomeServico, "Erro ao executar o serviço.", ex, ex.args[0], Main.IdProcessamento, "")
 
-def buscar_dados_global():
-    # BUSCAR DADOS DE CONFIG GLOBAL
-    try:
-        # Conexao com o banco
-        servidor, banco, login, senha = ConexaoPortal.obter_informacoes_conexao()
-        connection_string = f'DRIVER={{SQL Server}};SERVER={servidor};DATABASE={banco};UID={login};PWD={senha}'
+    def buscar_dados_global(self):
+        # BUSCAR DADOS DE CONFIG GLOBAL
+        try:
+            # Conexao com o banco
+            servidor, banco, login, senha = ConexaoPortal.obter_informacoes_conexao()
+            connection_string = f'DRIVER={{SQL Server}};SERVER={servidor};DATABASE={banco};UID={login};PWD={senha}'
 
-        query = "SELECT REGISTRO_ROTINA, TIPO_DE_ENVIO, DIAS_LOG, LOGIN_RSDATA, SENHA_RSDATA FROM CONFIG_GLOBAL"
+            query = "SELECT REGISTRO_ROTINA, TIPO_DE_ENVIO, DIAS_LOG, LOGIN_RSDATA, SENHA_RSDATA FROM CONFIG_GLOBAL"
 
-        with pyodbc.connect(connection_string) as conexao:
-            with conexao.cursor() as cursor:
-                cursor.execute(query)
-                rows = cursor.fetchall()
-                for row in rows:
-                    Main.RegistroRotina = row[0]
-                    Main.TipoEnvio = row[1]
-                    Main.DiasLog = int(row[2])
-                    Main.Username = row[3]
-                    Main.Password = row[4]
-                    # Faça o que precisar com os dados
+            with pyodbc.connect(connection_string) as conexao:
+                with conexao.cursor() as cursor:
+                    cursor.execute(query)
+                    rows = cursor.fetchall()
+                    for row in rows:
+                        self.RegistroRotina = row[0]
+                        self.TipoEnvio = row[1]
+                        self.DiasLog = int(row[2])
+                        self.Username = row[3]
+                        self.Password = row[4]
+                        # Faça o que precisar com os dados
 
-    except Exception as ex:
-        Guardian_LogTxt.LogAplicacao(ServiceConfig.NomeServico, f"Erro : {ex}")
-        GuardianLog.Log_Ocorrencia(ServiceConfig.NomeServico, "Erro ao executar ao buscar dados globais.", ex, ex.args[0], Main.IdProcessamento, "")
+        except Exception as ex:
+            Guardian_LogTxt.LogAplicacao(ServiceConfig.NomeServico, f"Erro : {ex}")
+            GuardianLog.Log_Ocorrencia(ServiceConfig.NomeServico, "Erro ao executar ao buscar dados globais.", ex, ex.args[0], self.IdProcessamento, "")
 
                 
     

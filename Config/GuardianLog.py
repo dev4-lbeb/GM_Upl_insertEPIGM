@@ -29,11 +29,13 @@ class GuardianLog:
     def Log_Rotina(sigla_rotina, nome_rotina, tipo, id_proc, cnpj):
         from Config.Service_Config import ServiceConfig
         from Service.Main import Main
-        if Main.LogRotinaHabilitado == True:
+
+        main = Main()
+        if main.LogRotinaHabilitado == True:
             log_rotina = LogRotina()
             log_rotina.IdProc = str(id_proc)
             log_rotina.IdLog = datetime.now().strftime("%Y%m%d%H%M%S") + sigla_rotina
-            log_rotina.IdCiclo = Main.IdCiclo
+            log_rotina.IdCiclo = main.IdCiclo
             log_rotina.Rotina = nome_rotina
             log_rotina.Tipo = tipo
             log_rotina.Data = datetime.now().strftime("%Y%m%d")
@@ -48,11 +50,13 @@ class GuardianLog:
     def Log_RotinaDelet(sigla_rotina, nome_rotina, tipo, id_proc, cnpj):
         from Config.Service_Config import ServiceConfig
         from Service.Main import Main
-        if Main.LogRotinaHabilitado == True:
+
+        main = Main()
+        if main.LogRotinaHabilitado == True:
             log_rotina = LogRotina()
             log_rotina.IdProc = str(id_proc)
             log_rotina.IdLog = datetime.now().strftime("%Y%m%d%H%M%S")
-            log_rotina.IdCiclo = Main.IdCiclo
+            log_rotina.IdCiclo = main.IdCiclo
             log_rotina.Rotina = f"{sigla_rotina}/{nome_rotina}"
             log_rotina.Tipo = tipo
             log_rotina.Data = datetime.now().strftime("%Y%m%d")
@@ -67,7 +71,9 @@ class GuardianLog:
     def Log_Ocorrencia(nome_rotina, descricao, descricao_tecnica, informacoes_adicionais, id_proc, cnpj):
             from Config.Service_Config import ServiceConfig
             from Service.Main import Main
-            if Main.LogOcorrenciaHabilitado == True:
+
+            main = Main()
+            if main.LogOcorrenciaHabilitado == True:
                 log_ocorrencia = LogOcorrencia()
                 log_ocorrencia.IdProc = id_proc
                 log_ocorrencia.NomeRotina = nome_rotina

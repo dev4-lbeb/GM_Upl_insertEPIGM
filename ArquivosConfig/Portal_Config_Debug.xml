@@ -2,32 +2,32 @@
 <Configuracoes>
   <Conexao>
     <Portal>
-      <Servidor>kifferti.ddns.net</Servidor>
+      <Servidor>CT101285\SQLEXPRESS</Servidor>
         <Banco>RSData_MIDD</Banco>
-      <Login>lbeb</Login>
-      <Senha>1xq@DVNCyG</Senha>
+      <Login>lbebMIDD</Login>
+      <Senha>Ap32001a@</Senha>
     </Portal>
 	<PortalLog>
-      <Servidor>kifferti.ddns.net</Servidor>
+      <Servidor>CT101285\SQLEXPRESS</Servidor>
         <Banco>RSData_MIDD_LOGS</Banco>
-      <Login>lbeb</Login>
-      <Senha>1xq@DVNCyG</Senha>
+      <Login>lbebMIDD</Login>
+      <Senha>Ap32001a@</Senha>
     </PortalLog>
     <Guardian>
-      <Servidor>kifferti.ddns.net</Servidor>
-        <Banco>RSData_MIDD</Banco>
-      <Login>lbeb</Login>
-      <Senha>1xq@DVNCyG</Senha>
+      <Servidor>LAPTOP-DP967FL5\SQLEXPRESS</Servidor>
+      <Banco>INTRANET_COTHERPACK</Banco>
+      <Login>sa</Login>
+      <Senha>mtiV1B79y87Ns3bP357vjA==</Senha>
     </Guardian>
     <ERP>
-      <Servidor>kifferti.ddns.net</Servidor>
-        <Banco>RSData_MIDD</Banco>
-      <Login>lbeb</Login>
-      <Senha>1xq@DVNCyG</Senha>
+      <Servidor>LAPTOP-DP967FL5\SQLEXPRESS</Servidor>
+      <Banco>INTRANET_COTHERPACK</Banco>
+      <Login>sa</Login>
+      <Senha>mtiV1B79y87Ns3bP357vjA==</Senha>
     </ERP>
     <Gestor>
       <Servidor>kifferti.ddns.net</Servidor>
-      <Banco>RSData_MIDD</Banco>
+      <Banco>RSData</Banco>
       <Login>lbeb</Login>
       <Senha>1xq@DVNCyG</Senha>
     </Gestor>

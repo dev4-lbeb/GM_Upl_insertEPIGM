@@ -5,19 +5,19 @@
       <Servidor>kifferti.ddns.net</Servidor>
       <Banco>guardianportal1</Banco>
       <Login>lbeb</Login>
-      <Senha>sox0OgOMiDmgUkR4tekyYg==</Senha>
+      <Senha>1xq@DVNCyG</Senha>
     </Guardian>
     <Portal>
       <Servidor>CT101285\SQLEXPRESS</Servidor>
       <Banco>RSData_MIDD</Banco>
       <Login>lbebMIDD</Login>
-      <Senha>+g0iDCggHNqMqtQhkmp0/w==</Senha>
+      <Senha>Ap32001a@</Senha>
     </Portal>
 	<PortalLog>
       <Servidor>CT101285\SQLEXPRESS</Servidor>
         <Banco>RSData_MIDD_LOGS</Banco>
       <Login>lbebMIDD</Login>
-      <Senha>+g0iDCggHNqMqtQhkmp0/w==</Senha>
+      <Senha>Ap32001a@</Senha>
     </PortalLog>
     <ERP>
       <Servidor>BRASCS01-SRV-58</Servidor>
@@ -29,7 +29,7 @@
       <Servidor>kifferti.ddns.net</Servidor>
       <Banco>RSData</Banco>
       <Login>lbeb</Login>
-      <Senha>sox0OgOMiDmgUkR4tekyYg==</Senha>
+      <Senha>1xq@DVNCyG</Senha>
     </Gestor>
   </Conexao>
   <Url>http://lbebsrv01:8051</Url>
