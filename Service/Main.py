@@ -64,7 +64,7 @@ class Main:
             #     GuardianLog.Log_Rotina("", ServiceConfig.NomeServico, Tipo.Finalizado, Main.IdProcessamento, dados_empresa.CNPJEmpresa)
 
             if self.RegistroRotina == "C" or self.RegistroRotina == "R":
-                Guardian_LogTxt.LogControle(TipoControle.Ciclo_Iniciado)
+                Guardian_LogTxt.LogControle(TipoControle.Ciclo_Iniciado) 
                 GuardianLog.Log_Rotina("", ServiceConfig.NomeServico, Tipo.Iniciado, self.IdProcessamento, "")
 
             EpiController.Executar()
@@ -74,7 +74,7 @@ class Main:
                 GuardianLog.Log_Rotina("", ServiceConfig.NomeServico, Tipo.Finalizado, self.IdProcessamento, "")
         except Exception as ex:
             Guardian_LogTxt.LogAplicacao(ServiceConfig.NomeServico, f"Erro : {ex}")
-            GuardianLog.Log_Ocorrencia(ServiceConfig.NomeServico, "Erro ao executar o serviço.", ex, ex.args[0], Main.IdProcessamento, "")
+            GuardianLog.Log_Ocorrencia(ServiceConfig.NomeServico, "Erro ao executar o serviço.", str(ex), ex.args[0], self.IdProcessamento, "")
 
     def buscar_dados_global(self):
         # BUSCAR DADOS DE CONFIG GLOBAL
@@ -99,7 +99,7 @@ class Main:
 
         except Exception as ex:
             Guardian_LogTxt.LogAplicacao(ServiceConfig.NomeServico, f"Erro : {ex}")
-            GuardianLog.Log_Ocorrencia(ServiceConfig.NomeServico, "Erro ao executar ao buscar dados globais.", ex, ex.args[0], self.IdProcessamento, "")
+            GuardianLog.Log_Ocorrencia(ServiceConfig.NomeServico, "Erro ao executar ao buscar dados globais.", str(ex), ex.args[0], self.IdProcessamento, "")
 
                 
     

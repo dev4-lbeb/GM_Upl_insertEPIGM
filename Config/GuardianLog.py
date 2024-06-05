@@ -60,7 +60,7 @@ class GuardianLog:
             log_rotina.Rotina = f"{sigla_rotina}/{nome_rotina}"
             log_rotina.Tipo = tipo
             log_rotina.Data = datetime.now().strftime("%Y%m%d")
-            log_rotina.Hora = datetime.now().strftime("%H:%M:%S.%f")
+            log_rotina.Hora = datetime.now().strftime("%H:%M:%S.%f")[:-3]
             log_rotina.Aplicacao = ServiceConfig.NomeServico
             log_rotina.Cliente = cnpj
 
@@ -78,7 +78,7 @@ class GuardianLog:
                 log_ocorrencia.IdProc = id_proc
                 log_ocorrencia.NomeRotina = nome_rotina
                 log_ocorrencia.Data = datetime.now().strftime("%Y%m%d")
-                log_ocorrencia.Hora = datetime.now().strftime("%H:%M:%S.%f")
+                log_ocorrencia.Hora = datetime.now().strftime("%H:%M:%S.%f")[:-3]
                 log_ocorrencia.Descricao = descricao.replace("'", "|")
                 log_ocorrencia.DescricaoTecnica = descricao_tecnica.replace("'", "|")
                 log_ocorrencia.InformacaoAdicional = informacoes_adicionais.replace("'", "|")

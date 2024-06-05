@@ -33,11 +33,23 @@ def Executar():
         if main.RegistroRotina == "R":
             GuardianLog.Log_Rotina("", ServiceConfig.NomeServico, Tipo.Iniciado, main.IdProcessamento, "")
 
-        limparTabela()
+        # limparTabela()
 
+        chaves_locais = buscar_epi_local()
+        
         lista_retornada = PegarRegistros()
 
-        xml_result = list_to_xml(lista_retornada);
+        # Filtrar os dados cuja chave não está na lista de chaves
+        nova_lista = []
+        # Iterar sobre cada tupla em dados
+        for dado in lista_retornada:
+            # dado[0] é a chave, dado[1] é o valor
+            chave = dado[11][1] 
+            if chave not in chaves_locais:
+                nova_lista.append(dado)
+            else:
+                print(f"local: {dado[11]}")  # Mostrar o que está sendo excluído
+        xml_result = list_to_xml(lista_retornada)
 
         # Conexao com o banco
         servidor, banco, login, senha = ConexaoPortal.obter_informacoes_conexao()
@@ -46,7 +58,7 @@ def Executar():
         connection = pyodbc.connect(connection_string)
         try:
             # Loop para inserir cada linha no SQL Server
-            for valores_da_linha in lista_retornada:
+            for valores_da_linha in nova_lista:
                 xmlEntradaOrigem = "#rs-data-sharing.rsdata.estoque_epi_por_filial"
                 xmlRespOrigem = xml_result
                 idfilial = valores_da_linha[0][1]
@@ -86,22 +98,19 @@ def Executar():
                 connection.commit() 
                 
         except Exception as ex:
-            GuardianLog.Log_Ocorrencia(ServiceConfig.NomeServico, f"Erro na query de insert: {str(sql_insert)}", ex, ex.args[0], main.IdProcessamento, "")
+            GuardianLog.Log_Ocorrencia(ServiceConfig.NomeServico, f"Erro na query de insert: {str(sql_insert)}", str(ex), ex.args[0], main.IdProcessamento, "")
         finally:
             # Fechar o cursor e a conexão
-            cursor.close()
-            connection.close()
+            if(len(nova_lista) != 0):
+                cursor.close()
+                connection.close()
 
         if main.RegistroRotina == "R":
             GuardianLog.Log_Rotina("", ServiceConfig.NomeServico, Tipo.Finalizado, main.IdProcessamento, "")
 
     except Exception as ex:
         Guardian_LogTxt.LogAplicacao(ServiceConfig.NomeServico, f"Erro : {ex}")
-        GuardianLog.Log_Ocorrencia(ServiceConfig.NomeServico, "Erro ao salvar os registros vindos do GM.", ex, ex.args[0], main.IdProcessamento, "")
-
-        
-    
-
+        GuardianLog.Log_Ocorrencia(ServiceConfig.NomeServico, "Erro ao salvar os registros vindos do GM.", str(ex), ex.args[0], main.IdProcessamento, "")
 
 def PegarRegistros():
     from Service.Main import Main
@@ -121,13 +130,20 @@ def PegarRegistros():
 
         print(client.list_all_tables())
 
+        # Definindo as variáveis datainicio e datafim
+        # datainicio = "2016-06-16 00:00:00"
+        # df = delta_sharing.load_table_changes_as_pandas(f"{FILE}#rs-data-sharing.rsdata.estoque_epi_por_filial", starting_timestamp='2024-05-29T00:00:00Z')
+        #df = delta_sharing.load_as_pandas(f"{FILE}#rs-data-sharing.rsdata.estoque_epi_por_filial", timestamp='2024-05-29T10:38:54Z')
         df = delta_sharing.load_as_pandas(f'{FILE}#rs-data-sharing.rsdata.estoque_epi_por_filial')
 
         # Definir os critérios de filtragem
         quantidade_min = 0.000
-        data_entrada = "2016-06-16"  # Exemplo de data a ser filtrada
         empresa_filtro = 2
         id_filial_filtro = 20        # Exemplo de id_filial a ser filtrado
+
+        data_atual = datetime.now()
+        data_entrada = data_atual.strftime('%Y-%m-%d')
+        #data_entrada = "2024-06-04"
 
         # Verificar se as colunas necessárias estão presentes no DataFrame
         colunas_necessarias = ['qtde_entrada', 'dataentrada', 'empresa', 'id_filial']
@@ -182,40 +198,69 @@ def PegarRegistros():
         for indice, linha in filtered_df.iterrows():
             # Lista para armazenar os valores da linha atual
             valores_da_linha = []
+            chave = ""
 
             for nome_coluna, valor in linha.items():
             # Adiciona cada valor da coluna à lista
                 valores_da_linha.append((nome_coluna, valor))
-        
+                if(nome_coluna == "id_filial"):
+                    chave += str(valor) + "|"
+                if(nome_coluna == "empresa"):
+                    chave += str(valor) + "|"
+                if(nome_coluna == "id_epi"):
+                    chave += str(valor) + "|"
+                if(nome_coluna == "id_tamanho"):
+                    chave += str(valor) + "|"
+                if(nome_coluna == "qtde_entrada"):
+                    quantiade = Decimal(valor)
+                    valor_normal = valor.normalize()
+                    valor_final = int(valor_normal) if valor_normal == valor_normal.to_integral() else float(valor_normal)
+                    chave += str(valor_final) + "|"
+                if(nome_coluna == "dataentrada"):
+                    chave += str(valor)
+
             # Adiciona a lista de valores da linha à lista principal
+            valores_da_linha.append(("chave", chave))
             lista_de_novos_valores.append(valores_da_linha)
         
         return lista_de_novos_valores
     except Exception as ex:
         Guardian_LogTxt.LogAplicacao(ServiceConfig.NomeServico, f"Erro : {ex}")
-        GuardianLog.Log_Ocorrencia(ServiceConfig.NomeServico, "Erro ao conectar ao GM e pegar os dados.", ex, ex.args[0], Main.IdProcessamento, "")
+        GuardianLog.Log_Ocorrencia(ServiceConfig.NomeServico, "Erro ao conectar ao GM e pegar os dados.", str(ex), ex.args[0], Main.IdProcessamento, "")
 
-def limparTabela():
-        from Service.Main import Main
-        # Conexao com o banco
-        servidor, banco, login, senha = ConexaoPortal.obter_informacoes_conexao()
-        connection_string = f'DRIVER={{SQL Server}};SERVER={servidor};DATABASE={banco};UID={login};PWD={senha}'
-        # Cria um cursor a partir da conexão
-        connection = pyodbc.connect(connection_string)
-        try:  
-            sql_delet = "DELETE FROM insertEstoqueEntrada"
-            # Cria um cursor a partir da conexão
-            cursor = connection.cursor()
-            # Execute a consulta SQL com parâmetros para o INSERT
-            cursor.execute(sql_delet)
-            # Confirme as alterações no banco de dados
-            connection.commit()        
-        except Exception as ex:
-            GuardianLog.Log_Ocorrencia(ServiceConfig.NomeServico, f"Erro na query de delete: {str(sql_delet)}", ex, ex.args[0], Main.IdProcessamento, "")
-        finally:
-            # Fechar o cursor e a conexão
-            cursor.close()
-            connection.close()
+def buscar_epi_local():
+    from Service.Main import Main
+    # Conexao com o banco
+    servidor, banco, login, senha = ConexaoPortal.obter_informacoes_conexao()
+    connection_string = f'DRIVER={{SQL Server}};SERVER={servidor};DATABASE={banco};UID={login};PWD={senha}'
+    # Cria um cursor a partir da conexão
+    connection = pyodbc.connect(connection_string)
+    lista_de_valores_locais = []
+
+    try:  
+        query = "SELECT idFilial, idLocalEstoque, idItem, codTamanho, quantidade, dtMovimento FROM insertEstoqueEntrada"
+
+        with pyodbc.connect(connection_string) as conexao:
+            with conexao.cursor() as cursor:
+                cursor.execute(query)
+                rows = cursor.fetchall()
+                for row in rows:
+                    chave = ""
+                    chave += str(row[0]) + "|"
+                    chave += str(row[1]) + "|"
+                    chave += str(row[2]) + "|"
+                    chave += str(row[3]) + "|"
+                    chave += str(row[4]) + "|"
+                    chave += str(row[5])
+                    lista_de_valores_locais.append(chave)
+    except Exception as ex:
+        GuardianLog.Log_Ocorrencia(ServiceConfig.NomeServico, f"Erro na query de busca por epi locais: {str(query)}", str(ex), ex.args[0], Main.IdProcessamento, "")
+    finally:
+        # Fechar o cursor e a conexão
+        cursor.close()
+        connection.close()
+
+    return lista_de_valores_locais
 
 def list_to_xml(lista_de_novos_valores):
     import xml.etree.ElementTree as ET
@@ -231,3 +276,25 @@ def list_to_xml(lista_de_novos_valores):
     xml_declaration = '<?xml version="1.0" encoding="UTF-8"?>\n'
     xml_string = xml_declaration + ET.tostring(root, encoding='unicode')
     return xml_string
+
+def limparTabela():
+    from Service.Main import Main
+    # Conexao com o banco
+    servidor, banco, login, senha = ConexaoPortal.obter_informacoes_conexao()
+    connection_string = f'DRIVER={{SQL Server}};SERVER={servidor};DATABASE={banco};UID={login};PWD={senha}'
+    # Cria um cursor a partir da conexão
+    connection = pyodbc.connect(connection_string)
+    try:  
+        sql_delet = "DELETE FROM insertEstoqueEntrada"
+        # Cria um cursor a partir da conexão
+        cursor = connection.cursor()
+        # Execute a consulta SQL com parâmetros para o INSERT
+        cursor.execute(sql_delet)
+        # Confirme as alterações no banco de dados
+        connection.commit()        
+    except Exception as ex:
+        GuardianLog.Log_Ocorrencia(ServiceConfig.NomeServico, f"Erro na query de delete: {str(sql_delet)}", str(ex), ex.args[0], Main.IdProcessamento, "")
+    finally:
+        # Fechar o cursor e a conexão
+        cursor.close()
+        connection.close()
