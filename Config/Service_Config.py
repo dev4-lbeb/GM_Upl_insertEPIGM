@@ -17,7 +17,7 @@ from Guardian.ConexaoPortalLog import ConexaoPortalLog
 
 class ServiceConfig:
     Status = False
-    NomeServico = "GM_Dow_insertLocalEstoque"
+    NomeServico = "GM_UPL_insertEstoqueEntrada"
     NomeCliente = "GM"
     DelayCiclo = 5
     DataValidade = 0
